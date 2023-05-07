@@ -1,0 +1,147 @@
+{% extends "page_layout.html" %}
+{%load static %}
+
+{%block css_files%}
+    <link rel="stylesheet" href="{% static "imaging_hub/image_style.css" %}">
+{%endblock%}
+
+{%block content%}
+<div class="container-fluid">   
+    <div class="row mt-3">
+        <div class="row col-md-12">
+            {% csrf_token %}
+            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-2">
+                <label class="lbl-m-t">Title</label>
+                <input type="text" name="txttitle" id="txttitle" class="form-control form-control-lg"
+                placeholder="Enter title" />
+            </div>
+
+            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-3">
+                <label class="lbl-m-t">Description</label>
+                <input type="text" name="txtdescription" id="txtdescription" class="form-control form-control-lg"
+                placeholder="Enter Description" />
+            </div>
+
+            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-3">
+                <label class="lbl-m-t">Category</label>
+                <select class="form-select form-select-lg mb-3" id="ddlcategory" aria-label=".form-select-lg example">
+                    <option value="0" selected>Select Category(s)</option>
+                    {%for category in categorys%}
+                        <option value="{{ category.id }}">{{ category.category_type }}</option>
+                    {% endfor %}                  
+                </select>
+            </div>
+
+            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4">
+                <div class="mt-4">
+                    <button type="button" id="btnSearch" class="btn btn-primary">Search
+                        <i class='bx bx-search'></i>
+                    </button> 
+                    <button type="button" id="btnReset" class="btn btn-secondary">Reset                       
+                    </button>  
+                    <button type="button" id="btnImageUpload" class="btn btn-primary">Upload Image
+                        <i class='bx bx-upload'></i>
+                    </button>                    
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div>
+        <h2>Image gallery</h2>
+    </div>
+    <div class="row mt-3" id="dvimagegallery">
+        {%for image in images%}
+            <div class="col-md-3">
+                <div class="card card-product-grid">
+                    <a href="{% url "image_summary" image.id %}" class="img-wrap"> <img src="{{image.image.url}}"> </a>
+                    <figcaption class="info-wrap">
+                        <div class="title mt-1"><span class="cardtext">Title:</span>{{ image.title }}</div>
+                        <div class="desc mt-1"><span class="cardtext">Description:</span>{{ image.description }}</div> 
+                        <div class="category mt-1"><span class="cardtext">Category:</span>{{ image.category_type.category_type }}</div> 
+                    </figcaption>
+                </div>
+            </div> 
+        {% empty %}
+           <div class="no-record-found">No images uploaded</div>
+        {% endfor %}
+    </div>
+</div>
+{%endblock%}
+
+{%block javascript%}
+<script type="text/javascript">    
+    $( document ).ready(function() {
+        $(document).on('click', '#btnReset', function(e){
+            window.location.href = "{% url 'image_gallery' %}"
+        });
+
+        $(document).on('click', '#btnImageUpload', function(e){
+            window.location.href = "{% url 'image_upload' %}"
+        });
+
+        function get_category_type(data, id){
+            let category_type_data = data.filter(x => x.id === id)
+                                        .map(x => x.category_type);
+            return category_type_data
+        }
+
+        function filtered_data(data, image_url_data, category_data){
+            let append = '';
+            $.each(data, function (idx, elem) {
+                append += '<div class="col-md-3">';
+                append += '<div class="card card-product-grid">';
+                append += '<a href="' + image_url_data[idx] + '" class="img-wrap"><img src="' + '/media/' + elem.image + '"> </a>';
+                append += '<figcaption class="info-wrap">';
+                append += '<div class="title mt-1"><span class="cardtext">Title:</span>' + elem.title + '</div>';
+                append += '<div class="desc mt-1"><span class="cardtext">Description:</span>' + elem.description + '</div>';
+                append += '<div class="category mt-1"><span class="cardtext">Category:</span>' + get_category_type(category_data, elem.category_type_id) + '</div>';
+                append += '</figcaption></div></div>';
+            });
+            $('#dvimagegallery').html(append);
+        }
+
+        $(document).on('click', '#btnSearch', function(e){
+            e.preventDefault();                    
+            let title = $("#txttitle").val();
+            let desc = $("#txtdescription").val();
+            let category_type = $("#ddlcategory option:selected").val();                
+
+            if (title == '' && desc == '' && category_type == '0') {
+                toastr.error('Please select search filter value');
+            }
+            else {
+                $.ajax({
+                    type: 'post',
+                    url: '{% url 'image_search' %}',
+                    data: {
+                        title: title,
+                        description: desc,
+                        category_type: category_type,                        
+                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                    },
+                    dataType: "json",
+                    success: function (response) {
+                        if(response.responseCode == 200){
+                            $('#dvimagegallery').html('');
+                            if(response.query_data.length > 0){
+                                filtered_data(response.query_data, response.image_url, response.category);
+                            }
+                            else{
+                                let append = '<div class="no-record-found">No images uploaded</div>';
+                                $('#dvimagegallery').html(append);
+                            }
+                        }  
+                        else{ 
+                            toastr.error(response.message);
+                        }               
+                    },
+                    error: function (response) {
+                    }
+                })
+            }            
+        });
+    });   
+</script>  
+{%endblock%}

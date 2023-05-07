@@ -1,0 +1,190 @@
+{% extends "login_layout.html" %}
+{%load static %}
+
+{%block css_files%}
+    <link rel="stylesheet" href="{% static "login/register_style.css" %}">
+{%endblock%}
+
+{%block content%}
+<div class="container register">
+    <div class="row">
+        <div class="col-md-3 register-left">            
+            <h3>Welcome</h3>
+            <p>Password must contain atleast 5 characters</p>
+        </div>
+        <div class="col-md-9 register-right">
+            <div class="tab-content">
+                <h3 class="register-heading">Register</h3>
+                <form id="registerform" method="POST">
+                    {% csrf_token %}
+                    <div class="row register-form">
+                        <div class="col-md-6">
+                            <div class="form-group mb-4">
+                                <input type="text" class="form-control form-control-lg" name="txtfirstname" id="txtfirstname"
+                                    placeholder="First Name *" />
+                            </div>
+                            <div class="form-group mt-4 mb-4">
+                                <input type="text" class="form-control form-control-lg" name="txtlastname" id="txtlastname"
+                                    placeholder="Last Name *" />
+                            </div>
+                            <div class="form-group mt-4 mb-4">
+                                <input type="password" class="form-control form-control-lg" name="txtpassword" id="txtpassword"
+                                    placeholder="Password *" />
+                            </div>
+                            <div class="form-group">
+                                <div class="maxl">
+                                    <label class="radio inline">
+                                        <input type="radio" name="gender" value="male">
+                                        <span> Male </span>
+                                    </label>
+                                    <label class="radio inline">
+                                        <input type="radio" name="gender" value="female">
+                                        <span>Female </span>
+                                    </label>
+                                    <p class='p-gender-err-text'></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-4">
+                                <input type="email" class="form-control form-control-lg" name="txtemail" id="txtemail"
+                                    placeholder="Your Email *" />
+                            </div>
+                            <div class="form-group mt-4 mb-4">
+                                <input type="text" minlength="10" maxlength="10" id="txtmobileno" name="txtmobileno"
+                                    class="form-control form-control-lg" placeholder="Your Mobile No" />
+                            </div>
+                            <div class="form-group mt-4" id="dvconfirmpassword">
+                                <input type="password" class="form-control form-control-lg" name="txtpasswordconfirm" id="txtconfirmpassword"
+                                    placeholder="Confirm Password *" value="" />
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-lg btnRegister">Register</button>                              
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{%endblock%}
+
+{%block javascript%}
+<script type="text/javascript">
+    
+    $( document ).ready(function() {
+
+        $("#registerform").validate({
+            // Specify validation rules
+            rules: {
+                // The key name on the left side is the name attribute
+                // of an input field. Validation rules are defined
+                // on the right side
+                txtfirstname: "required",
+                txtlastname: "required",               
+                gender: { required: true },
+                txtemail: {
+                    required: true,
+                    // Specify that email should be validated
+                    // by the built-in "email" rule
+                    email: true
+                },
+                txtpassword: {
+                    required: true,
+                    minlength: 5
+                },
+                txtpasswordconfirm: {
+                    minlength: 5,
+                    equalTo: "#txtpassword"
+                }
+            },
+            // Specify validation error messages
+            messages: {
+                txtfirstname: "Please enter Firstname",
+                txtlastname: "Please enter Lastname",              
+                gender: 'Please select gender',
+                txtpassword: {
+                    required: "Please provide a password",
+                    minlength: "Password must be at least 5 characters long"
+                },
+                txtpasswordconfirm: {
+                    minlength: "Password must be at least 5 characters long"
+                },
+                txtemail: "Please enter a valid email address"               
+            },
+            errorPlacement: function (error, element) {
+                if (element.is(":radio")) {
+                    error.appendTo('.p-gender-err-text');
+                }
+                else { // This is the default behavior 
+                    if($('#txtlastname').hasClass('error')){                  
+                        $('#dvconfirmpassword').removeClass('mt-4').addClass('mt-5')
+                    }
+                    error.insertAfter(element);
+                }
+            }
+        });
+
+        $('#txtlastname').on('input',function(e){
+            if(!$('#txtlastname').hasClass('error')){                  
+                $('#dvconfirmpassword').addClass('mt-4').removeClass('mt-5')
+            }
+        });
+
+        $(document).on('submit', '#registerform', function(e){
+            e.preventDefault();            
+            if ($("#registerform").valid()) {
+                let gender_value = 0;
+                $.each($("input[name='gender']:checked"), function(){
+                    if($(this).val() == 'male'){
+                        gender_value = 1;
+                    }
+                    else{
+                        gender_value = 2;
+                    }
+                });
+        
+                $.ajax({
+                    type: 'post',
+                    url: '{% url 'user_registration' %}',
+                    data: {
+                        first_name: $('#txtfirstname').val(),
+                        last_name: $('#txtlastname').val(),
+                        email: $('#txtemail').val(),
+                        pwd: $('#txtpassword').val(),               
+                        phone_no: $('#txtmobileno').val(),
+                        gender: gender_value,
+                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                    },
+                    dataType: "json",
+                    success: function (response) {
+                        if(response.responseCode == 200){
+                            toastr.success(response.message + ', Please login to the website');
+                            clearData();  
+                            setTimeout(function(){
+                                window.location.href = "{% url 'login' %}"
+                            }, 2000);
+                        }  
+                        else{ 
+                            toastr.error(response.message);
+                        }               
+                    },
+                    error: function (response) {
+                    }
+                })
+            }                          
+        });
+    
+        function clearData(){
+            $('#txtfirstname').val('');
+            $('#txtlastname').val('');
+            $('#txtemail').val('');
+            $('#txtpassword').val('');
+            $('#txtmobileno').val('');
+            $.each($("input[name='gender']:checked"), function(){
+                $(this).prop('checked', false);
+            });
+        }
+    });   
+
+</script>  
+{%endblock%}

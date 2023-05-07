@@ -1,0 +1,45 @@
+{% extends "page_layout.html" %}
+{%load static %}
+
+{%block css_files%}
+    <link rel="stylesheet" href="{% static "imaging_hub/image_style.css" %}">
+{%endblock%}
+
+{%block content%}
+<div class="container-fluid">
+    <div class="d-flex align-box">
+        <div class="row col-sm-12 col-xs-12 col-md-3 col-lg-3">
+            <h2 class="mt-4">Image Details</h2>
+            <div class="form-group mt-2">
+                <label for="txttitle">Title </label>
+                <input type="text" name="txttitle" class="form-control" readonly id="txttitle" value="{{ title }}">
+            </div>
+
+            <div class="form-group mt-4">
+                <label for="txtdescription" required="required">Description</label>
+                <input type="text" name="txtdescription" class="form-control" readonly id="txtdescription" value="{{ description }}">
+            </div>
+
+            <div class="form-group mt-4">
+                <label for="txtcategorytype">Category Type</label>
+                <input type="text" name="txtcategorytype" class="form-control" readonly id="txtcategorytype" value="{{ category }}">
+            </div>
+            
+            <div class="form-group mt-4">
+                <label for="txtuploadedby">Uploaded By</label>
+                <input type="text" name="txtuploadedby" class="form-control" readonly id="txtuploadedby" value="{{ uploaded_by }}">
+            </div>
+        </div>
+
+        <div class="row col-sm-12 col-xs-12 col-md-6 col-lg-6 mt-5 align-img">
+            <div class="form-group mt-3">
+                <img src="{{image_url.url}}" class="img-view" alt="image_view">
+             </div>
+        </div>
+    </div>
+</div>
+{%endblock%}
+
+{%block javascript%}
+
+{%endblock%}

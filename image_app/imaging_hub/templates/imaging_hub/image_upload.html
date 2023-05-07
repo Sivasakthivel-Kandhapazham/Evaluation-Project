@@ -1,0 +1,148 @@
+{% extends "page_layout.html" %}
+{%load static %}
+
+{%block css_files%}
+    <link rel="stylesheet" href="{% static "imaging_hub/image_style.css" %}">
+{%endblock%}
+
+{%block content%}
+<div class="container-fluid">
+    <form method="POST" id="file_upload" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="d-flex align-items-center justify-content-center">
+            <div class="row col-sm-12 col-xs-12 col-md-4 col-lg-4">
+                <h2 class="mt-4">Image Upload</h2>                
+                <div class="form-group mt-2">
+                    <label for="txttitle">Title <span class="req-field">*</span></label>
+                    <input type="text" name="txttitle" class="form-control" id="txttitle" placeholder="Enter Title">
+                </div>
+
+                <div class="form-group mt-4">
+                    <label for="txtdescription" required="required">Description <span class="req-field">*</span></label>
+                    <input type="text" name="txtdescription" class="form-control" id="txtdescription"
+                        aria-describedby="emailHelp" placeholder="Enter Description">
+                </div>
+
+                <div class="form-group mt-4">
+                    <label for="ddlcategory">Category <span class="req-field">*</span></label>
+                    <select class="form-select form-select-lg mb-3" name="ddlcategory" id="ddlcategory" class="required" name="ddlcategory">
+                        <option value="" selected>Select Category(s)</option>
+                        {%for category in categorys%}
+                            <option value="{{ category.id }}">{{ category.category_type }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group mt-3">
+                    <label class="mr-2">Upload Image <span class="req-field">*</span></label>
+                    <input type="file" name="file_image" id="file_image" accept="image/*">
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="button" id="btnReset" class="btn btn-secondary">Reset</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{%endblock%}
+
+{%block javascript%}
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        function getExtension(filename) {
+            var parts = filename.split('.');
+            return parts[parts.length - 1];
+        }
+
+        function isImage(filename) {
+            var ext = getExtension(filename);
+            switch (ext.toLowerCase()) {
+                case 'jpg':
+                case 'jpeg':
+                case 'gif':
+                case 'bmp':
+                case 'png':
+                    //etc
+                    return true;
+            }
+            return false;
+        }
+
+        $("#file_upload").validate({
+            // Specify validation rules
+            rules: {
+                // The key name on the left side is the name attribute
+                // of an input field. Validation rules are defined
+                // on the right side
+                txttitle: "required",
+                txtdescription: "required",
+                ddlcategory: { required: true },
+            },
+            // Specify validation error messages
+            messages: {
+                txttitle: "Please enter Title",
+                txtdescription: "Please enter Description",
+                ddlcategory: 'Please select Category Type'
+            },
+            errorPlacement: function (error, element) {
+                error.insertAfter(element);
+            }
+        });
+
+        $(document).on('submit', '#file_upload', function (e) {
+            e.preventDefault();
+            if ($("#file_upload").valid()) {
+                csrf_token = $('input[name="csrfmiddlewaretoken"]').val();
+                var image_file = document.getElementById("file_image").files[0];
+                var file_name = document.getElementById("file_image");
+
+                // Allowing file type
+                if (!isImage(file_name.value)) {
+                    toastr.error('Please select a valid image');
+                    return false;
+                }
+
+                var formData = new FormData();
+                formData.append('image', image_file);
+                formData.append('title', $('#txttitle').val());
+                formData.append('description', $('#txtdescription').val());
+                formData.append('category_type', $("#ddlcategory option:selected").val());
+                formData.append('csrfmiddlewaretoken', csrf_token);
+
+                $.ajax({
+                    url: '{% url 'post_image' %}',
+                    data: formData,
+                    contentType: 'multipart/form-data',
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    type: 'post',
+                    success: function (response) {
+                        if (response.responseCode == 200) {
+                            toastr.success(response.message);
+                            clearData();
+                            setTimeout(function () {
+                                window.location.href = "{% url 'image_gallery' %}"
+                            }, 2000);
+                        }
+                        else {
+                            toastr.error(response.message);
+                        }
+                    }
+                });
+            }
+
+        });
+
+        function clearData() {
+            $('#txttitle').val('');
+            $('#txtdescription').val('');
+            $('#ddlcategory').val(0);
+            $("#file_image").val('');
+        }
+    });   
+</script>
+{%endblock%}
