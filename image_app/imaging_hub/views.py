@@ -84,19 +84,19 @@ def image_gallery_filter(request):
         image_url = []
         image_gallery = []        
         category_list = Category.objects.all().values()
-        if category_type != '' and description == '' and title == '':
+        if category_type != '0' and description == '' and title == '':
             image_gallery = ImageGallery.objects.filter(Q(category_type = category_type)).values()
-        elif category_type == '' and description != '' and title == '':           
+        elif category_type == '0' and description != '' and title == '':           
             image_gallery = ImageGallery.objects.filter(Q(description__contains = description)).values()
-        elif category_type == '' and description == '' and title != '':           
+        elif category_type == '0' and description == '' and title != '':           
             image_gallery = ImageGallery.objects.filter(Q(title__contains = title)).values()
-        elif category_type != '' and description != '' and title == '':           
+        elif category_type != '0' and description != '' and title == '':           
             image_gallery = ImageGallery.objects.filter(Q(category_type = category_type) & 
                                                         Q(description__contains = description)).values()
-        elif category_type != '' and description == '' and title != '':           
+        elif category_type != '0' and description == '' and title != '':           
             image_gallery = ImageGallery.objects.filter(Q(category_type = category_type) & 
                                                         Q(title__contains = title)).values()
-        elif category_type == '' and description != '' and title != '':           
+        elif category_type == '0' and description != '' and title != '':           
             image_gallery = ImageGallery.objects.filter(Q(description__contains = description) & 
                                                         Q(title__contains = title)).values()
         else:
