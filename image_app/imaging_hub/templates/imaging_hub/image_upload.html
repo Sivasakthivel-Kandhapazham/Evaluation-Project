@@ -14,12 +14,12 @@
                 <h2 class="mt-4">Image Upload</h2>                
                 <div class="form-group mt-2">
                     <label for="txttitle">Title <span class="req-field">*</span></label>
-                    <input type="text" name="txttitle" class="form-control" id="txttitle" placeholder="Enter Title">
+                    <input type="text" name="txttitle" autocomplete="off" class="form-control" id="txttitle" placeholder="Enter Title">
                 </div>
 
                 <div class="form-group mt-4">
                     <label for="txtdescription" required="required">Description <span class="req-field">*</span></label>
-                    <input type="text" name="txtdescription" class="form-control" id="txtdescription"
+                    <input type="text" name="txtdescription" autocomplete="off" class="form-control" id="txtdescription"
                         aria-describedby="emailHelp" placeholder="Enter Description">
                 </div>
 
@@ -92,13 +92,29 @@
             }
         });
 
+        $('#file_image').on('change', function() {
+            var numb = $(this)[0].files[0].size / 1024 / 1024;
+            numb = numb.toFixed(2);
+            if (numb > 2) {
+                toastr.error('To big, maximum is 2MB. You file size is: ' + numb + ' MB');
+                $("#file_image").val('');
+            }             
+        });
+
         $(document).on('submit', '#file_upload', function (e) {
             e.preventDefault();
             if ($("#file_upload").valid()) {
+
+                if ($("#file_image").val() == null ||  $("#file_image").val() == '')
+                {
+                    toastr.error('Please select a image file');
+                    return false;
+                }
+
                 csrf_token = $('input[name="csrfmiddlewaretoken"]').val();
                 var image_file = document.getElementById("file_image").files[0];
                 var file_name = document.getElementById("file_image");
-
+                
                 // Allowing file type
                 if (!isImage(file_name.value)) {
                     toastr.error('Please select a valid image');

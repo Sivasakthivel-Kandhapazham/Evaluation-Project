@@ -5,6 +5,8 @@ from login.models import User
 from django.utils import timezone
 from django.urls import reverse
 from django.db.models import Q
+from django.core.files.uploadedfile import UploadedFile
+import base64
 
 
 # Create your views here.
@@ -46,13 +48,17 @@ def upload_image_process(request):
             category_type = request.POST.get('category_type')
             category_model = Category.objects.get(pk = int(category_type))
             transaction_date = timezone.now()
+            if isinstance(image_file, UploadedFile):
+                binary_data = image_file.read()
+            else:
+                binary_data = None 
             image_gallery = ImageGallery(image  = image_file, title = title, description = description, 
                                     category_type = category_model, created_by = request.session['user_id'],
-                                    created_date = transaction_date)
+                                    created_date = transaction_date, image_data = binary_data)
             image_gallery.save()
             return JsonResponse({"message": "Image upload successful", "responseCode": 200}, status=200)
         except Exception as ex:
-            return JsonResponse({"message": "Error while procesing", "responseCode": 400}, status=200)
+            return JsonResponse({"message": ex, "responseCode": 400}, status=200)
      
 
 def image_detailed_view(request, id):
@@ -66,7 +72,7 @@ def image_detailed_view(request, id):
                 "description": image_gallery.description,
                 "category": image_gallery.category_type.category_type,
                 "uploaded_by": full_name,
-                "image_url": image_gallery.image,
+                "image_binary_data": image_gallery.image_data,
             })
         else:
             redirect_path = reverse("logout")
@@ -81,8 +87,10 @@ def image_gallery_filter(request):
         description = request.POST.get('description')
         category_type = request.POST.get('category_type')
         
+        image_gallery_data = []
         image_url = []
-        image_gallery = []        
+        image_gallery = []     
+        image_binary_data = []   
         category_list = Category.objects.all().values()
         if category_type != '0' and description == '' and title == '':
             image_gallery = ImageGallery.objects.filter(Q(category_type = category_type)).values()
@@ -104,10 +112,20 @@ def image_gallery_filter(request):
                                                         Q(title__contains = title)).values()
 
         for image in image_gallery:
+            print(image)
             url = reverse('image_summary', kwargs={'id': image["id"]})            
             image_url.append(url)
+            img_bytes_data = base64.b64encode(image["image_data"]).decode('utf-8')
+            image_binary_data.append(img_bytes_data)
+            result = {
+                'id': image["id"],
+                'title': image["title"],
+                'description': image["description"],
+                'category_type': image["category_type_id"],
+            }
+            image_gallery_data.append(result)
   
-        return JsonResponse({"query_data": list(image_gallery), "category": list(category_list), "image_url" : list(image_url), "responseCode": 200}, status=200, safe=False)
+        return JsonResponse({"query_data": list(image_gallery_data), "category": list(category_list), "image_url" : list(image_url), "image_bytes_data" : list(image_binary_data), "responseCode": 200}, status=200, safe=False)
      except Exception as ex:
          return JsonResponse({"message": ex, "responseCode": 400}, status=200)
 

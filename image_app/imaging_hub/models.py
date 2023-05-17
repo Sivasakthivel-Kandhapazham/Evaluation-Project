@@ -12,6 +12,7 @@ class ImageGallery(models.Model):
     description = models.CharField(max_length = 500)
     category_type = models.ForeignKey(Category, default=1, verbose_name="Category", on_delete=models.SET_DEFAULT)
     image = models.ImageField(upload_to = 'images/')
+    image_data = models.BinaryField(verbose_name='Image', blank = True, null = True, editable=True)
     created_by = models.IntegerField(null = True)
     created_date = models.DateTimeField(null = True)
 
