@@ -1,0 +1,82 @@
+{% extends "page_layout.html" %}
+{%load static %}
+
+{%block css_files%}
+<link rel="stylesheet" href="{% static "video_speech/video_style.css" %}">
+{%endblock%}
+
+{%block content%}
+<div class="container-fluid">
+    <form method="POST" id="file_upload" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="d-flex align-items-center justify-content-center">
+            <div class="row col-sm-12 col-xs-12 col-md-6 col-lg-6">
+                <h2 class="mt-4">Video to Text Transcript</h2>                
+
+                <div class="form-group mt-3">
+                    <label class="mr-2">Upload Video/Audio <span class="req-field">*</span></label>
+                    <input type="file" name="file_video" id="file_video" accept="video/*">
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="button" id="btnReset" class="btn btn-secondary">Reset</button>
+                </div>
+                <div class="row">                    
+                </div>
+                <div class="mt-4">
+                    <div class="form-group">
+                        <label for="txtresult">Transcript</label>
+                        <textarea class="form-control rounded-0" id="txtresult" rows="10"></textarea>
+                      </div>
+                </div>
+            </div>
+
+        </div>
+    </form>
+</div>
+{%endblock%}
+
+{%block javascript%}
+<script type="text/javascript">    
+    $( document ).ready(function() {
+        $(document).on('click', '#btnReset', function(e){
+            window.location.href = "{% url 'video_text' %}"
+        });     
+
+        $(document).on('submit', '#file_upload', function(e){
+            e.preventDefault();  
+                $('#txtresult').val('');
+                csrf_token = $('input[name="csrfmiddlewaretoken"]').val();
+                var video_file = document.getElementById("file_video").files[0];
+
+                var formData = new FormData();
+                formData.append('video', video_file);
+                formData.append('csrfmiddlewaretoken', csrf_token);
+                $('.loader').show();
+                $.ajax({
+                    url: '{% url 'post_video' %}',
+                    data: formData,
+                    contentType: 'multipart/form-data',
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    type: 'post',
+                    success: function (response) {
+                        if (response.responseCode == 200) {
+                            toastr.success('Speach recognition success!');
+                            $('#txtresult').val(response.message.text)
+                            $('#file_video').val('');   
+                            $('.loader').hide();                   
+                        }
+                        else {
+                            toastr.error(response.message);
+                            $('.loader').hide();  
+                        }
+                    }
+                });                 
+                      
+        });
+    });   
+</script>  
+{%endblock%}

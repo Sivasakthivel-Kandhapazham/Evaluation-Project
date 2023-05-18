@@ -1,0 +1,20 @@
+[image_validation]
+image_file_types = ['jpeg', 'jpg', 'png', 'gif', 'bmb']
+max_file_size = 2097152  
+
+[image_error_message]
+image_empty = 'Please select image'
+image_extension = 'Invalid image extension, Please select Image file format'
+image_size = 'To big, maximum is 2 MB. Your file size is:'
+
+[video_validation]
+video_file_types = ['mp3', 'mp4']
+video_max_size = 2e+7
+
+[video_error_message]
+video_empty = 'Please select video'
+video_extension = 'Invalid video extension, Please select video file format in mp3, mp4'
+video_size = 'To big, maximum is 20 MB. Your file size is:'
+
+[openai_whisper]
+api_key = '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'

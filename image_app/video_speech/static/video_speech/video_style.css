@@ -1,0 +1,12 @@
+#file_video{
+    cursor: pointer;
+}
+
+.req-field {
+    color: red;
+}
+
+.btn-secondary {
+    background-color: #8f6e6e;
+    border-color: #8f6e6e;
+}

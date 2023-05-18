@@ -7,6 +7,8 @@ from django.urls import reverse
 from django.db.models import Q
 from django.core.files.uploadedfile import UploadedFile
 import base64
+import numpy as np
+from image_app.__init__ import image_file_size, image_size_error_message, image_file_types, image_extension_msg, image_empty_msg
 
 
 # Create your views here.
@@ -41,8 +43,18 @@ def image_upload_view(request):
 
 def upload_image_process(request):
     if request.method == 'POST':
-        try:
-            image_file = request.FILES.get("image")
+        try:         
+            image_file = request.FILES.get("image")  
+            if image_file is None:
+                return JsonResponse({"message": image_empty_msg , "responseCode": 220}, status=200)
+            
+            extension = image_file.name.split('.')[-1]   
+            if not extension or extension.lower() not in image_file_types:
+                 return JsonResponse({"message": image_extension_msg , "responseCode": 220}, status=200)         
+                   
+            if image_file.size > image_file_size:
+                 return JsonResponse({"message": f'{image_size_error_message} {np.round(image_file.size/1048576,0)} MB', "responseCode": 220}, status=200)
+            
             title = request.POST.get('title')
             description = request.POST.get('description')
             category_type = request.POST.get('category_type')
@@ -112,7 +124,6 @@ def image_gallery_filter(request):
                                                         Q(title__contains = title)).values()
 
         for image in image_gallery:
-            print(image)
             url = reverse('image_summary', kwargs={'id': image["id"]})            
             image_url.append(url)
             img_bytes_data = base64.b64encode(image["image_data"]).decode('utf-8')
