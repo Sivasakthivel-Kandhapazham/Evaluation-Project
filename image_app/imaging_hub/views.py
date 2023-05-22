@@ -8,7 +8,9 @@ from django.db.models import Q
 from django.core.files.uploadedfile import UploadedFile
 import base64
 import numpy as np
-from image_app.__init__ import image_file_size, image_size_error_message, image_file_types, image_extension_msg, image_empty_msg
+from image_app.email_service import send_email
+from config import AppCongiuration
+from Logging.log_to_file import setup_logger
 
 
 # Create your views here.
@@ -45,15 +47,21 @@ def upload_image_process(request):
     if request.method == 'POST':
         try:         
             image_file = request.FILES.get("image")  
+            app_initiate = AppCongiuration()
+            app_config = app_initiate.load_app_config_settings()
+            logger = setup_logger()
             if image_file is None:
-                return JsonResponse({"message": image_empty_msg , "responseCode": 220}, status=200)
+                logger.info(app_config.image_empty_msg)
+                return JsonResponse({"message": app_config.image_empty_msg , "responseCode": 220}, status=200)
             
             extension = image_file.name.split('.')[-1]   
-            if not extension or extension.lower() not in image_file_types:
-                 return JsonResponse({"message": image_extension_msg , "responseCode": 220}, status=200)         
+            if not extension or extension.lower() not in app_config.image_file_types:
+                 logger.info(app_config.image_extension_msg)
+                 return JsonResponse({"message": app_config.image_extension_msg , "responseCode": 220}, status=200)         
                    
-            if image_file.size > image_file_size:
-                 return JsonResponse({"message": f'{image_size_error_message} {np.round(image_file.size/1048576,0)} MB', "responseCode": 220}, status=200)
+            if image_file.size > app_config.image_file_size:
+                 logger.info(f'{app_config.image_size_error_message} {np.round(image_file.size/1048576,0)} MB')
+                 return JsonResponse({"message": f'{app_config.image_size_error_message} {np.round(image_file.size/1048576,0)} MB', "responseCode": 220}, status=200)
             
             title = request.POST.get('title')
             description = request.POST.get('description')
@@ -68,8 +76,11 @@ def upload_image_process(request):
                                     category_type = category_model, created_by = request.session['user_id'],
                                     created_date = transaction_date, image_data = binary_data)
             image_gallery.save()
+            send_email(f"Image with name {image_file.name} uploaded successfully", "Success - Image uploaded")
             return JsonResponse({"message": "Image upload successful", "responseCode": 200}, status=200)
         except Exception as ex:
+            logger.error(f"Error occured while uploading image with name {image_file.name} exception : {ex}")
+            send_email(f"Error occured while uploading image with name {image_file.name}", "Failure - Image uploaded!")
             return JsonResponse({"message": ex, "responseCode": 400}, status=200)
      
 

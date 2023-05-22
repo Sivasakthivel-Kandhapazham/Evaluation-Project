@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'login',
     'imaging_hub',
-    'video_speech'
+    'video_speech',
+    'web_scraping'
 ]
 
 MIDDLEWARE = [

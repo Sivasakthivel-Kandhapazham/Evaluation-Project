@@ -1,0 +1,38 @@
+.card-product-grid {
+    margin-bottom: 20px;
+}
+
+.card-product-grid .img-wrap {
+    border-radius: 0.2rem 0.2rem 0 0;
+    height: 220px;
+}
+
+.img-wrap img {
+    height: 100%;
+    width: 100%;
+    display: inline-block;
+    -o-object-fit: cover;
+    object-fit: cover;
+}
+
+.card-product-grid .info-wrap {
+    overflow: hidden;
+    padding: 12px 20px;
+}
+
+title, .rating {
+    color: #212529;
+    display: block;
+}
+
+.cardtext{
+    font-size: 1rem !important;
+    font-weight: 500;
+    color: blue;
+}
+
+.no-record-found {
+    margin: auto;
+    width: 50%;
+    padding: 10px;
+}

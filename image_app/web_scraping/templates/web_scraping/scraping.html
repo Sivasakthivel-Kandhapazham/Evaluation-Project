@@ -1,0 +1,41 @@
+{% extends "page_layout.html" %}
+{%load static %}
+
+{%block css_files%}
+<link rel="stylesheet" href="{% static "web_scraping/scraping_style.css" %}">
+{%endblock%}
+
+{%block content%}
+<div class="container-fluid">
+    <div class="d-flex align-items-center justify-content-center">
+        <div class="row col-sm-12 col-xs-12 col-md-12 col-lg-12">
+            <h2 class="mt-4">Scraping IMDB website,  Top 15 movie list</h2>                
+            <div class="mt-4">
+                <div class="row " id="dvimagegallery">
+                    {%for movies in movie_text%}
+                        <div class="row col-md-3">
+                            <div class="card card-product-grid">
+                                {% if movies.image_src != None %}
+                                   <div class="img-wrap"><img src="{{ movies.image_src }}" alt="image"></div>
+                                {% else %}
+                                    <img alt="image" src="">
+                                {%endif%}
+                                <figcaption class="info-wrap">
+                                    <div class="title mt-1">Title: <span class="cardtext">{{ movies.movie_title|title }}</span></div>
+                                    <div class="rating mt-1">Rating: <span class="cardtext">{{ movies.rating }}</span></div> 
+                                </figcaption>
+                            </div>
+                        </div> 
+                    {% empty %}
+                       <div class="no-record-found">No content found</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{%endblock%}
+
+{%block javascript%}
+ 
+{%endblock%}
