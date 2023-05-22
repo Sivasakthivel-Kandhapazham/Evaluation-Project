@@ -17,7 +17,7 @@ video_extension = 'Invalid video extension, Please select video file format in m
 video_size = 'To big, maximum is 20 MB. Your file size is:'
 
 [openai_whisper]
-api_key = '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' # Provide opanai api key
+api_key = '' # Provide opanai api key
 
 [email_service]
 sender_email_id = '' # Provide sender email id
