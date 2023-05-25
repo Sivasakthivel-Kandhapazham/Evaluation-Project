@@ -23,6 +23,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('login.urls')),
     path('image/', include('imaging_hub.urls')),
+    path('video/', include('video_speech.urls')),
+    path('scraping/', include('web_scraping.urls')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

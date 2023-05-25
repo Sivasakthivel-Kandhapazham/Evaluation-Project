@@ -1,5 +1,6 @@
 {% extends "page_layout.html" %}
 {%load static %}
+{% load base64_encode %}
 
 {%block css_files%}
     <link rel="stylesheet" href="{% static "imaging_hub/image_style.css" %}">
@@ -55,7 +56,11 @@
         {%for image in images%}
             <div class="col-md-3">
                 <div class="card card-product-grid">
-                    <a href="{% url "image_summary" image.id %}" class="img-wrap"> <img src="{{image.image.url}}"> </a>
+                    {% if image.image_data != None %}
+                        <a href="{% url "image_summary" image.id %}" class="img-wrap"> <img src="data:image/jpeg;base64, {{image.image_data|base64_encode}}" alt="image"> </a>
+                    {% else %}
+                        <img alt="image" src="">
+                    {%endif%}
                     <figcaption class="info-wrap">
                         <div class="title mt-1"><span class="cardtext">Title:</span>{{ image.title }}</div>
                         <div class="desc mt-1"><span class="cardtext">Description:</span>{{ image.description }}</div> 
@@ -87,16 +92,16 @@
             return category_type_data
         }
 
-        function filtered_data(data, image_url_data, category_data){
+        function filtered_data(data, image_url_data, category_data, img_data){
             let append = '';
             $.each(data, function (idx, elem) {
                 append += '<div class="col-md-3">';
                 append += '<div class="card card-product-grid">';
-                append += '<a href="' + image_url_data[idx] + '" class="img-wrap"><img src="' + '/media/' + elem.image + '"> </a>';
+                append += '<a href="' + image_url_data[idx] + '" class="img-wrap"><img src="data:image/png;base64, '+img_data[idx]+'"> </a>';
                 append += '<figcaption class="info-wrap">';
                 append += '<div class="title mt-1"><span class="cardtext">Title:</span>' + elem.title + '</div>';
                 append += '<div class="desc mt-1"><span class="cardtext">Description:</span>' + elem.description + '</div>';
-                append += '<div class="category mt-1"><span class="cardtext">Category:</span>' + get_category_type(category_data, elem.category_type_id) + '</div>';
+                append += '<div class="category mt-1"><span class="cardtext">Category:</span>' + get_category_type(category_data, elem.category_type) + '</div>';
                 append += '</figcaption></div></div>';
             });
             $('#dvimagegallery').html(append);
@@ -126,7 +131,7 @@
                         if(response.responseCode == 200){
                             $('#dvimagegallery').html('');
                             if(response.query_data.length > 0){
-                                filtered_data(response.query_data, response.image_url, response.category);
+                                filtered_data(response.query_data, response.image_url, response.category, response.image_bytes_data);
                             }
                             else{
                                 let append = '<div class="no-record-found">No images uploaded</div>';
