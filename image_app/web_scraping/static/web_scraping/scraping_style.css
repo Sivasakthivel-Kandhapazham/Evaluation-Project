@@ -36,3 +36,11 @@ title, .rating {
     width: 50%;
     padding: 10px;
 }
+
+#ddlmovieott{
+    cursor: pointer;
+}
+
+#dvtitle{
+    font-weight: 500;
+}

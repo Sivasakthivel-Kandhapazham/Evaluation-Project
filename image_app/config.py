@@ -27,6 +27,11 @@ class AppCongiuration:
             self.email_auth = config['email_service']['email_auth']
             self.sender_email_msg = config['email_service']['sender_email_msg']
 
-            self.web_scraping_imdb_success = config['web_scraping']['web_scraping_imdb_success']
+            self.web_scraping_imdb = config['web_scraping']['web_scraping_imdb']
+            self.web_scraping_metacritic = config['web_scraping']['web_scraping_metacritic']
+            self.imdb_movie_site = config['web_scraping']['imdb_movie_site']
+            self.meta_critic_netflix = config['web_scraping']['meta_critic_netflix']
+            self.meta_critic_piv = config['web_scraping']['meta_critic_piv']
+            self.meta_critic_hulu = config['web_scraping']['meta_critic_hulu']
             return self
     

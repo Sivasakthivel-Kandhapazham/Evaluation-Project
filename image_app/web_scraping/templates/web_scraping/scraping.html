@@ -7,11 +7,36 @@
 
 {%block content%}
 <div class="container-fluid">
+    <div class="row mt-3">
+        <div class="row col-md-12">
+            {% csrf_token %}           
+            <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3">
+                <label class="lbl-m-t">Filter:</label>
+                <select class="form-select form-select-lg mb-3" id="ddlmovieott" aria-label=".form-select-lg example">
+                    <option value="0">Select Channel(s)</option>     
+                    <option value="1" selected>IMDB</option> 
+                    <option value="2">Netflix</option>
+                    <option value="3">Amazon Prime</option>    
+                    <option value="4">Hulu</option>                            
+                </select>
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4">
+                <div class="mt-4">
+                    <button type="button" id="btnSearch" class="btn btn-primary">Search
+                        <i class='bx bx-search'></i>
+                    </button> 
+                    <button type="button" id="btnReset" class="btn btn-secondary">Reset                       
+                    </button>                                     
+                </div>
+            </div>
+
+        </div>
+    </div>
     <div class="d-flex align-items-center justify-content-center">
         <div class="row col-sm-12 col-xs-12 col-md-12 col-lg-12">
-            <h2 class="mt-4">Scraping IMDB website,  Top 15 movie list</h2>                
+            <div class="mt-2" id="dvtitle">IMDB - All time Top 10 movies list</div>                
             <div class="mt-4">
-                <div class="row " id="dvimagegallery">
+                <div class="row" id="dvmoviegallery">
                     {%for movies in movie_text%}
                         <div class="row col-md-3">
                             <div class="card card-product-grid">
@@ -37,5 +62,84 @@
 {%endblock%}
 
 {%block javascript%}
- 
+<script type="text/javascript">    
+    $( document ).ready(function() {
+        $(document).on('click', '#btnReset', function(e){
+            window.location.href = "{% url 'web_scraping' %}"
+        });       
+
+        function filtered_data(data){
+            let append = '';
+            $.each(data, function (idx, elem) {
+                append += '<div class="row col-md-3">';
+                append += '<div class="card card-product-grid">';
+                if(elem.image_src != '' && elem.image_src != null && elem.image_src !='undefined'){
+                    append += '<div class="img-wrap"><img alt="image" src="'+elem.image_src+'"> </div>';
+                }
+                else{
+                    append += '<div class="img-wrap"><img src="" alt="image"></div>';
+                }
+                append += '<figcaption class="info-wrap">';
+                append += '<div class="title mt-1">Title: <span class="cardtext">' + elem.movie_title + '</span></div>';
+                append += '<div class="rating mt-1">Rating: <span class="cardtext">' + elem.rating + '</span></div>';
+                append += '</figcaption></div></div>';
+            });
+            $('#dvmoviegallery').html(append);
+        }
+
+        $(document).on('click', '#btnSearch', function(e){
+            e.preventDefault();                    
+            let ott_type = $("#ddlmovieott option:selected").val();                
+
+            if (ott_type == '0') {
+                toastr.error('Please select search filter value');
+            }
+            else {
+                $('.loader').show();
+                $('#dvmoviegallery').html('');
+                $('#dvtitle').html('');
+                $.ajax({
+                    type: 'post',
+                    url: '{% url 'web_scraping_meta' %}',
+                    data: {
+                        ott_type: ott_type,                        
+                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                    },
+                    dataType: "json",
+                    success: function (response) {
+                        if(response.responseCode == 200){                            
+                            if(response.scraping_data.length > 0){
+                                filtered_data(response.scraping_data);
+                                if(ott_type == 1){
+                                    $('#dvtitle').html('IMDB - All time Top 10 movies list');
+                                }
+                                else if(ott_type == 2){
+                                    $('#dvtitle').html('Netflix - All time Top 10 movies list (Based on metacritic site)');
+                                }
+                                else if(ott_type == 3){
+                                    $('#dvtitle').html('Amazon prime - All time Top 10 movies list (Based on metacritic site)');
+                                }
+                                else{
+                                    $('#dvtitle').html('Hulu - All time Top 10 movies list (Based on metacritic site)');
+                                }
+                            }
+                            else{
+                                let append = '<div class="no-record-found">No content uploaded</div>';
+                                $('#dvmoviegallery').html(append);
+                            }
+                        }  
+                        else{ 
+                            toastr.error(response.message);
+                        }    
+                        $('.loader').hide();           
+                    },
+                    error: function (response) {
+                        $('.loader').hide(); 
+                        toastr.error('Something went wrong');
+                    }
+                })
+            }            
+        });
+    });   
+</script>  
 {%endblock%}

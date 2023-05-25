@@ -15,7 +15,10 @@ from Logging.log_to_file import setup_logger
 
 # Create your views here.
 def logout(request):
-     request.session.flush()
+     logger = setup_logger()
+     email = request.session["email_id"]
+     request.session.flush()     
+     logger.info(f"User with email: {email} is logout successfully")
      return render(request,'login/login.html')
 
 

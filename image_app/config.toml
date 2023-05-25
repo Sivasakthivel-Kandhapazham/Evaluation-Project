@@ -26,4 +26,9 @@ email_auth = '' # Provide email password for authentication
 sender_email_msg = 'Sender email id is empty'
 
 [web_scraping]
-web_scraping_imdb_success = 'Web scraping of imdb site is success'
+web_scraping_imdb = 'Web scraping of imdb site is success'
+web_scraping_metacritic = 'Web scraping of metacritic site is success'
+imdb_movie_site = 'https://www.imdb.com/chart/top'
+meta_critic_netflix = 'https://www.metacritic.com/browse/movies/score/metascore/all/filtered/netflix'
+meta_critic_piv = 'https://www.metacritic.com/browse/movies/score/metascore/all/filtered/piv'
+meta_critic_hulu = 'https://www.metacritic.com/browse/movies/score/metascore/all/filtered/hulu'

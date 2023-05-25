@@ -24,3 +24,7 @@
     z-index: 9999;
 }
 
+.navbar-nav .active {
+    color: #fdf5f5 !important;
+}
+
