@@ -1,0 +1,34 @@
+[image_validation]
+image_file_types = ['jpeg', 'jpg', 'png', 'gif', 'bmb']
+max_file_size = 2097152  
+
+[image_error_message]
+image_empty = 'Please select image'
+image_extension = 'Invalid image extension, Please select Image file format'
+image_size = 'To big, maximum is 2 MB. Your file size is:'
+
+[video_validation]
+video_file_types = ['mp3', 'mp4']
+video_max_size = 2e+7
+
+[video_error_message]
+video_empty = 'Please select video'
+video_extension = 'Invalid video extension, Please select video file format in mp3, mp4'
+video_size = 'To big, maximum is 20 MB. Your file size is:'
+
+[openai_whisper]
+api_key = '' # Provide opanai api key
+
+[email_service]
+sender_email_id = '' # Provide sender email id
+receiver_email_id = '' # Provide receiver email id
+email_auth = '' # Provide email password for authentication
+sender_email_msg = 'Sender email id is empty'
+
+[web_scraping]
+web_scraping_imdb = 'Web scraping of imdb site is success'
+web_scraping_metacritic = 'Web scraping of metacritic site is success'
+imdb_movie_site = 'https://www.imdb.com/chart/top'
+meta_critic_netflix = 'https://www.metacritic.com/browse/movies/score/metascore/all/filtered/netflix'
+meta_critic_piv = 'https://www.metacritic.com/browse/movies/score/metascore/all/filtered/piv'
+meta_critic_hulu = 'https://www.metacritic.com/browse/movies/score/metascore/all/filtered/hulu'

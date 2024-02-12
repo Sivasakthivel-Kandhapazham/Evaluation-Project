@@ -1,5 +1,6 @@
 {% extends "page_layout.html" %}
 {%load static %}
+{% load base64_encode %}
 
 {%block css_files%}
     <link rel="stylesheet" href="{% static "imaging_hub/image_style.css" %}">
@@ -33,7 +34,7 @@
 
         <div class="row col-sm-12 col-xs-12 col-md-6 col-lg-6 mt-5 align-img">
             <div class="form-group mt-3">
-                <img src="{{image_url.url}}" class="img-view" alt="image_view">
+                <img src="data:image/jpeg;base64, {{image_binary_data|base64_encode}}" class="img-view" alt="image">
              </div>
         </div>
     </div>
